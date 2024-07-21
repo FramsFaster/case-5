@@ -1,0 +1,114 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <map>
+#include <locale.h>
+
+using namespace std;
+
+int main() {
+    setlocale(LC_ALL, "RUS");
+    map<string, pair<int, int>> students; // структура для хранения имени студента, возраста и балла
+
+    while (true) {
+        int choice;
+        cout << "Что вы хотите сделать?" << endl;
+        cout << "1 - Вписать нового студента" << endl;
+        cout << "2 - Узнать средний балл студента" << endl;
+        cout << "3 - Узнать всю информацию о студенте" << endl;
+        cout << "0 - Выйти из программы" << endl;
+        cin >> choice;
+
+        if (choice == 0) {
+            break;
+        }
+        else if (choice == 1) {
+            string name;
+            int age, score;
+
+            cout << "Введите имя студента: ";
+            cin >> name;
+
+            cout << "Введите возраст студента: ";
+            cin >> age;
+
+            cout << "Введите балл студента: ";
+            cin >> score;
+
+            students[name] = make_pair(age, score);
+
+            // Добавляем данные о студенте в файл Excel
+            ofstream outFile("students.txt", ios::app);
+            if (outFile.is_open()) {
+                outFile << name << " " << age << " " << score << endl;
+                outFile.close();
+            }
+            else {
+                cout << "Ошибка записи в файл." << endl;
+            }
+        }
+        else if (choice == 2) {
+            string queryName;
+            cout << "Введите имя студента для подсчета среднего балла: ";
+            cin >> queryName;
+
+            // Проверка наличия студента в базе
+            if (students.find(queryName) != students.end()) {
+                int avgScore = students[queryName].second; // средний балл равен баллу студента
+
+                // Вывод среднего балла студента
+                cout << queryName << " средний балл: " << avgScore << endl;
+
+                // Описываем оценку студента
+                string grade;
+                if (avgScore >= 85) {
+                    grade = "Отлично";
+                }
+                else if (avgScore >= 70) {
+                    grade = "Хорошо";
+                }
+                else if (avgScore >= 50) {
+                    grade = "Удовлетворительно";
+                }
+                else {
+                    grade = "Неудовлетворительно";
+                }
+
+                cout << "Оценка студента: " << grade << endl;
+            }
+            else {
+                cout << "Студент с именем " << queryName << " не найден." << endl;
+            }
+        }
+        else if (choice == 3) {
+            string queryName;
+            cout << "Введите имя студента для получения всей информации: ";
+            cin >> queryName;
+
+            // Открываем файл Excel для чтения
+            ifstream inFile("students.txt");
+            string line;
+            bool found = false;
+
+            // Поиск студента и вывод данных о нем
+            while (getline(inFile, line)) {
+                if (line.find(queryName) != string::npos) {
+                    cout << line << endl;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                cout << "Студент с именем " << queryName << " не найден." << endl;
+            }
+
+            inFile.close();
+        }
+        else {
+            cout << "Некорректный выбор. Пожалуйста, выберите 1, 2, 3 или 0." << endl;
+        }
+    }
+
+    return 0;
+}
